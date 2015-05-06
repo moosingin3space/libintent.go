@@ -5,6 +5,7 @@ func Register(protocol string,
 	validator func(Intent) bool,
 	handler <-chan Intent) (recv IntentReceiver, err error) {
 
+	done := make(chan bool)
 	err := makeIntentDirectories()
 	if err != nil {
 		return
@@ -15,5 +16,10 @@ func Register(protocol string,
 		return
 	}
 
-	// TODO kick off a goroutine to monitor this
+	go intentListenerProc(protocolSocket, protocol, app, validator, handler, done)
+	return &IntentReceiver{done: done}
+}
+
+func Unregister(recv IntentReceiver) {
+	recv.done <- true
 }

@@ -11,6 +11,5 @@ type Application struct {
 }
 
 type IntentReceiver struct {
-	incomingIntents chan Intent
-	done            chan bool
+	done chan bool
 }
