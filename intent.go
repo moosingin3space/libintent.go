@@ -3,10 +3,10 @@ package intent
 func Register(protocol string,
 	app Application,
 	validator func(Intent) bool,
-	handler <-chan Intent) (recv IntentReceiver, err error) {
+	handler chan<- Intent) (recv IntentReceiver, err error) {
 
 	done := make(chan bool)
-	err := makeIntentDirectories()
+	err = makeIntentDirectories()
 	if err != nil {
 		return
 	}
@@ -17,7 +17,8 @@ func Register(protocol string,
 	}
 
 	go intentListenerProc(protocolSocket, protocol, app, validator, handler, done)
-	return &IntentReceiver{done: done}
+	recv = IntentReceiver{done: done}
+	return
 }
 
 func Unregister(recv IntentReceiver) {

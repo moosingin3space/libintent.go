@@ -4,7 +4,6 @@ package intent
 // that will allow libintent.go to work
 // on other OSes
 import (
-	"errors"
 	"net"
 	"os"
 	osuser "os/user"
@@ -53,7 +52,7 @@ func makeProtocolSocket(protocol string) (conn net.Conn, err error) {
 	path := filepath.Join(user.HomeDir,
 		INTENT_DIRECTORY, HANDLER_DIRECTORY, protocol)
 	addr := &net.UnixAddr{path, "unixgram"}
-	conn, err := net.ListenUnixgram("unixgram", addr)
+	conn, err = net.ListenUnixgram("unixgram", addr)
 	if err != nil {
 		return
 	}
@@ -69,4 +68,5 @@ func removeProtocolSocket(protocol string) (err error) {
 	path := filepath.Join(user.HomeDir,
 		INTENT_DIRECTORY, HANDLER_DIRECTORY, protocol)
 	os.Remove(path)
+	return
 }
