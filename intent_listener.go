@@ -2,6 +2,7 @@ package intent
 
 import (
 	"encoding/binary"
+	"github.com/tinylib/msgp/msgp"
 	"net"
 )
 
@@ -43,7 +44,17 @@ func intentListenerProc(conn net.Conn,
 				panic(err)
 			}
 
-			// TODO decode buffer using msgpack, validate the intent, and if passes, handle it
+			// decode buffer using messagepack
+			var intent Intent
+			_, err := intent.UnmarshalMsg(buf)
+			if err == nil {
+				// nothing went wrong
+				// validate the intent
+				if validator(intent) {
+					// tell it to handle the intent
+					handler <- intent
+				}
+			}
 		}
 	}
 }

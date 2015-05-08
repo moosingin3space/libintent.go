@@ -1,3 +1,4 @@
+// go:generate msgp
 package intent
 
 type Intent struct {

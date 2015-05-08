@@ -1,5 +1,14 @@
 {
 	"ImportPath": "github.com/moosingin3space/libintent.go",
 	"GoVersion": "go1.4",
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/philhofer/fwd",
+			"Rev": "899e4efba8eaa1fea74175308f3fae18ff3319fa"
+		},
+		{
+			"ImportPath": "github.com/tinylib/msgp/msgp",
+			"Rev": "75ee40d2601edf122ef667e2a07d600d4c44490c"
+		}
+	]
 }
