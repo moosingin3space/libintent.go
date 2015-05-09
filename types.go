@@ -1,4 +1,4 @@
-// go:generate msgp
+// go:generate msgp -o types_gen.go -io=false -tests=false
 package intent
 
 type Intent struct {
@@ -12,5 +12,6 @@ type Application struct {
 }
 
 type IntentReceiver struct {
-	done chan bool
+	protocol string
+	done     chan bool
 }

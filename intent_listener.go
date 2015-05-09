@@ -3,17 +3,15 @@ package intent
 import (
 	"encoding/binary"
 	"github.com/tinylib/msgp/msgp"
-	"net"
+	"io"
 )
 
-func intentListenerProc(conn net.Conn,
-	protocol string,
+func intentListenerProc(conn io.ReadWriter,
 	app Application,
 	validator func(Intent) bool,
 	handler chan<- Intent,
 	quit <-chan bool) {
 
-	defer removeProtocolSocket(protocol)
 	for {
 		select {
 		case <-quit:
@@ -45,10 +43,11 @@ func intentListenerProc(conn net.Conn,
 			}
 
 			// decode buffer using messagepack
-			var intent Intent
-			_, err := intent.UnmarshalMsg(buf)
+			var data interface{}
+			_, err = data.(msgp.Unmarshaler).UnmarshalMsg(buf)
 			if err == nil {
 				// nothing went wrong
+				intent := data.(Intent)
 				// validate the intent
 				if validator(intent) {
 					// tell it to handle the intent
