@@ -58,7 +58,7 @@ func (p UnixPlatform) Destroy() (err error) {
 	}
 
 	intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
-	os.Remove(intentRootDir)
+	os.RemoveAll(intentRootDir)
 	return
 }
 
