@@ -1,4 +1,5 @@
-// +build unix
+// +build darwin dragonfly freebsd linux netbsd openbsd
+
 package intent
 
 import (
@@ -14,7 +15,7 @@ const HANDLER_DIRECTORY = "handler"
 const COMM_DIRECTORY = "comm"
 
 func createUnixSocket(path string) (conn net.Conn, err error) {
-	addr := &net.UnixAddr{path, "unixgram"}
+	addr := &net.UnixAddr{Name: path, Net: "unixgram"}
 	conn, err = net.ListenUnixgram("unixgram", addr)
 	return
 }

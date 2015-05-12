@@ -1,8 +1,8 @@
-// +build unix
-package intent_test
+// +build darwin dragonfly freebsd linux netbsd openbsd
+
+package intent
 
 import (
-	intent "github.com/moosingin3space/libintent.go"
 	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	osuser "os/user"
@@ -12,7 +12,7 @@ import (
 
 func TestInitAndDestroy(t *testing.T) {
 	Convey("Given a UNIX platform", t, func() {
-		platform := intent.UnixPlatform{}
+		platform := UnixPlatform{}
 		user, err := osuser.Current()
 		So(err, ShouldBeNil)
 
@@ -20,17 +20,17 @@ func TestInitAndDestroy(t *testing.T) {
 			err := platform.Init()
 			So(err, ShouldBeNil)
 
-			intentRootDir := filepath.Join(user.HomeDir, intent.INTENT_DIRECTORY)
+			intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
 			_, err = os.Stat(intentRootDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
 
-			handlerDir := filepath.Join(intentRootDir, intent.HANDLER_DIRECTORY)
+			handlerDir := filepath.Join(intentRootDir, HANDLER_DIRECTORY)
 			_, err = os.Stat(handlerDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
 
-			commDir := filepath.Join(intentRootDir, intent.COMM_DIRECTORY)
+			commDir := filepath.Join(intentRootDir, COMM_DIRECTORY)
 			_, err = os.Stat(commDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
@@ -40,7 +40,7 @@ func TestInitAndDestroy(t *testing.T) {
 			err := platform.Destroy()
 			So(err, ShouldBeNil)
 
-			intentRootDir := filepath.Join(user.HomeDir, intent.INTENT_DIRECTORY)
+			intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
 			_, err = os.Stat(intentRootDir)
 			So(err, ShouldNotBeNil)
 			So(os.IsNotExist(err), ShouldBeTrue)
