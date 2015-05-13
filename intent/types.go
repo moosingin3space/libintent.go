@@ -1,4 +1,4 @@
-// go:generate msgp -o types_gen.go -io=false -tests=false
+//go:generate msgp -o types_gen.go -io=false -tests=false
 package intent
 
 type Intent struct {

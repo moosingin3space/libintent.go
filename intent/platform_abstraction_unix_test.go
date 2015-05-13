@@ -1,8 +1,9 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-package intent
+package intent_test
 
 import (
+	"github.com/moosingin3space/libintent.go/intent"
 	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	osuser "os/user"
@@ -12,7 +13,7 @@ import (
 
 func TestInitAndDestroy(t *testing.T) {
 	Convey("Given a UNIX platform", t, func() {
-		platform := UnixPlatform{}
+		platform := intent.UnixPlatform{}
 		user, err := osuser.Current()
 		So(err, ShouldBeNil)
 
@@ -20,17 +21,17 @@ func TestInitAndDestroy(t *testing.T) {
 			err := platform.Init()
 			So(err, ShouldBeNil)
 
-			intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
+			intentRootDir := filepath.Join(user.HomeDir, ".intent")
 			_, err = os.Stat(intentRootDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
 
-			handlerDir := filepath.Join(intentRootDir, HANDLER_DIRECTORY)
+			handlerDir := filepath.Join(intentRootDir, "handler")
 			_, err = os.Stat(handlerDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
 
-			commDir := filepath.Join(intentRootDir, COMM_DIRECTORY)
+			commDir := filepath.Join(intentRootDir, "comm")
 			_, err = os.Stat(commDir)
 			So(err, ShouldBeNil)
 			So(os.IsNotExist(err), ShouldBeFalse)
@@ -40,10 +41,25 @@ func TestInitAndDestroy(t *testing.T) {
 			err := platform.Destroy()
 			So(err, ShouldBeNil)
 
-			intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
+			intentRootDir := filepath.Join(user.HomeDir, ".intent")
 			_, err = os.Stat(intentRootDir)
 			So(err, ShouldNotBeNil)
 			So(os.IsNotExist(err), ShouldBeTrue)
+		})
+	})
+}
+
+func TestPathnamesAreExpected(t *testing.T) {
+	Convey("Given a UNIX platform", t, func() {
+		platform := intent.UnixPlatform{}
+		Convey("Protocols should use the path handler/protocol", func() {
+			protocol := platform.Protocol("http")
+			So(protocol, ShouldEqual, "handler/http")
+		})
+
+		Convey("Conversations should use the path comm/protocol", func() {
+			comm := platform.Conversation("conv1")
+			So(comm, ShouldEqual, "comm/conv1")
 		})
 	})
 }
