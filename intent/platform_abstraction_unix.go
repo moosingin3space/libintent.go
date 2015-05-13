@@ -20,15 +20,23 @@ func createUnixSocket(path string) (conn net.Conn, err error) {
 	return
 }
 
-type UnixPlatform struct{}
+type Configuration interface {
+	GetBaseDir() (string, error)
+}
+
+type UnixPlatform struct {
+	Config Configuration
+}
+
+type UserUnixConfiguration struct{}
 
 func (p UnixPlatform) Init() (err error) {
 	// Create directories
-	user, err := osuser.Current()
+	baseDir, err := p.Config.GetBaseDir()
 	if err != nil {
 		return
 	}
-	intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
+	intentRootDir := filepath.Join(baseDir, INTENT_DIRECTORY)
 	if _, e := os.Stat(intentRootDir); os.IsNotExist(e) {
 		err = os.Mkdir(intentRootDir, 0700)
 		if err != nil {
@@ -53,12 +61,12 @@ func (p UnixPlatform) Init() (err error) {
 }
 
 func (p UnixPlatform) Destroy() (err error) {
-	user, err := osuser.Current()
+	baseDir, err := p.Config.GetBaseDir()
 	if err != nil {
 		return
 	}
 
-	intentRootDir := filepath.Join(user.HomeDir, INTENT_DIRECTORY)
+	intentRootDir := filepath.Join(baseDir, INTENT_DIRECTORY)
 	os.RemoveAll(intentRootDir)
 	return
 }
@@ -72,28 +80,40 @@ func (p UnixPlatform) Conversation(name string) string {
 }
 
 func (p UnixPlatform) NewSocket(name string) (conn io.ReadWriter, err error) {
-	user, err := osuser.Current()
+	baseDir, err := p.Config.GetBaseDir()
 	if err != nil {
 		return
 	}
 
-	path := filepath.Join(user.HomeDir, INTENT_DIRECTORY, name)
+	path := filepath.Join(baseDir, INTENT_DIRECTORY, name)
 
 	conn, err = createUnixSocket(path)
 	return
 }
 
 func (p UnixPlatform) CleanupSocket(name string) (err error) {
-	user, err := osuser.Current()
+	baseDir, err := p.Config.GetBaseDir()
 	if err != nil {
 		return
 	}
 
-	path := filepath.Join(user.HomeDir, INTENT_DIRECTORY, name)
+	path := filepath.Join(baseDir, INTENT_DIRECTORY, name)
 	os.Remove(path)
 	return
 }
 
+func (c UserUnixConfiguration) GetBaseDir() (string, error) {
+	user, err := osuser.Current()
+	if err != nil {
+		return "", err
+	}
+	return user.HomeDir, nil
+}
+
+func DefaultUnixPlatform() Platform {
+	return UnixPlatform{Config: UserUnixConfiguration{}}
+}
+
 func DefaultPlatform() Platform {
-	return UnixPlatform{}
+	return DefaultUnixPlatform()
 }

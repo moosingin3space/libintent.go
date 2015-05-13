@@ -12,8 +12,8 @@ import (
 )
 
 func TestInitAndDestroy(t *testing.T) {
-	Convey("Given a UNIX platform", t, func() {
-		platform := intent.UnixPlatform{}
+	Convey("Given a default UNIX platform", t, func() {
+		platform := intent.DefaultUnixPlatform()
 		user, err := osuser.Current()
 		So(err, ShouldBeNil)
 
@@ -49,9 +49,37 @@ func TestInitAndDestroy(t *testing.T) {
 	})
 }
 
+func TestHandlesErrors(t *testing.T) {
+	Convey("Given a Unix platform without a basedir", t, func() {
+		platform := intent.UnixPlatform{Config: BasedirFailsConfig{}}
+
+		expectToFail := func(err error) {
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldEqual, "expected!")
+		}
+
+		Convey("Init should pass the expected error down", func() {
+			expectToFail(platform.Init())
+		})
+
+		Convey("Destroy should pass the expected error down", func() {
+			expectToFail(platform.Destroy())
+		})
+
+		Convey("Creating new sockets should error", func() {
+			_, err := platform.NewSocket("sock")
+			expectToFail(err)
+		})
+
+		Convey("Cleaning up sockets should error", func() {
+			expectToFail(platform.CleanupSocket("sock"))
+		})
+	})
+}
+
 func TestPathnamesAreExpected(t *testing.T) {
 	Convey("Given a UNIX platform", t, func() {
-		platform := intent.UnixPlatform{}
+		platform := intent.DefaultUnixPlatform()
 		Convey("Protocols should use the path handler/protocol", func() {
 			protocol := platform.Protocol("http")
 			So(protocol, ShouldEqual, "handler/http")
