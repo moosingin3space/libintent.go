@@ -1,6 +1,7 @@
 # Universal Intents
 
 [![Build Status](https://travis-ci.org/moosingin3space/libintent.go.svg)](https://travis-ci.org/moosingin3space/libintent.go)
+[![Coverage Status](https://coveralls.io/repos/moosingin3space/libintent.go/badge.svg)](https://coveralls.io/r/moosingin3space/libintent.go)
 
 This project is the reference implementation of my Universal Intents
 specification. It is implemented in the Go programming language for
