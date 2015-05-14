@@ -50,13 +50,13 @@ func TestInitAndDestroy(t *testing.T) {
 }
 
 func TestHandlesErrors(t *testing.T) {
+	expectToFail := func(err error) {
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "expected!")
+	}
+
 	Convey("Given a Unix platform without a basedir", t, func() {
 		platform := intent.UnixPlatform{Config: BasedirFailsConfig{}}
-
-		expectToFail := func(err error) {
-			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldEqual, "expected!")
-		}
 
 		Convey("Init should pass the expected error down", func() {
 			expectToFail(platform.Init())
@@ -73,6 +73,19 @@ func TestHandlesErrors(t *testing.T) {
 
 		Convey("Cleaning up sockets should error", func() {
 			expectToFail(platform.CleanupSocket("sock"))
+		})
+	})
+
+	Convey("Given a Unix platform that cannot create directories", t, func() {
+		Convey("Init should pass the expected error down", func() {
+			platform := intent.UnixPlatform{Config: MkdirFailsFirstConfig{}}
+			expectToFail(platform.Init())
+
+			platform = intent.UnixPlatform{Config: MkdirFailsSecondConfig{}}
+			expectToFail(platform.Init())
+
+			platform = intent.UnixPlatform{Config: MkdirFailsThirdConfig{}}
+			expectToFail(platform.Init())
 		})
 	})
 }

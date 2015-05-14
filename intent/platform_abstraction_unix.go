@@ -22,13 +22,19 @@ func createUnixSocket(path string) (conn net.Conn, err error) {
 
 type Configuration interface {
 	GetBaseDir() (string, error)
+	DirExists(string) bool
+	Mkdir(string) error
 }
 
 type UnixPlatform struct {
 	Config Configuration
 }
 
-type UserUnixConfiguration struct{}
+type BaseUnixConfiguration struct{}
+
+type UserUnixConfiguration struct {
+	BaseUnixConfiguration
+}
 
 func (p UnixPlatform) Init() (err error) {
 	// Create directories
@@ -37,22 +43,22 @@ func (p UnixPlatform) Init() (err error) {
 		return
 	}
 	intentRootDir := filepath.Join(baseDir, INTENT_DIRECTORY)
-	if _, e := os.Stat(intentRootDir); os.IsNotExist(e) {
-		err = os.Mkdir(intentRootDir, 0700)
+	if !p.Config.DirExists(intentRootDir) {
+		err = p.Config.Mkdir(intentRootDir)
 		if err != nil {
 			return
 		}
 	}
 	handlerDir := filepath.Join(intentRootDir, HANDLER_DIRECTORY)
-	if _, e := os.Stat(handlerDir); os.IsNotExist(e) {
-		err = os.Mkdir(handlerDir, 0700)
+	if !p.Config.DirExists(handlerDir) {
+		err = p.Config.Mkdir(handlerDir)
 		if err != nil {
 			return
 		}
 	}
 	commDir := filepath.Join(intentRootDir, COMM_DIRECTORY)
-	if _, e := os.Stat(commDir); os.IsNotExist(e) {
-		err = os.Mkdir(commDir, 0700)
+	if !p.Config.DirExists(commDir) {
+		err = p.Config.Mkdir(commDir)
 		if err != nil {
 			return
 		}
@@ -100,6 +106,15 @@ func (p UnixPlatform) CleanupSocket(name string) (err error) {
 	path := filepath.Join(baseDir, INTENT_DIRECTORY, name)
 	os.Remove(path)
 	return
+}
+
+func (c BaseUnixConfiguration) DirExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
+func (c BaseUnixConfiguration) Mkdir(path string) error {
+	return os.Mkdir(path, 0700)
 }
 
 func (c UserUnixConfiguration) GetBaseDir() (string, error) {
