@@ -1,17 +1,18 @@
-//go:generate msgp -o types_gen.go -io=false -tests=false
 package intent
 
+type Verb int
+
+const (
+	READ Verb = iota
+	WRITE
+	DELETE
+	CAPS
+)
+
 type Intent struct {
-	Url    string
-	Params map[string][]byte
-}
-
-type Application struct {
-	Name    string
-	Version string
-}
-
-type IntentReceiver struct {
-	protocol string
-	done     chan bool
+	Protocol string
+	Path     string
+	Verb     Verb
+	Metadata map[string]interface{}
+	Payload  []byte
 }
