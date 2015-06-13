@@ -6,18 +6,25 @@ import (
 	"net"
 )
 
+const socketPath = "/please/change/me"
+
 type UnixRegistry struct {
+	conn net.Conn
 	quit <-chan bool
 }
 
 func RunRegistry() (*Registry, error) {
+	socket, err := net.ListenUnixgram("unixgram", &net.UnixAddr{socketPath, "unixgram"})
+	if err != nil {
+		return nil, err
+	}
+
 	r := &UnixRegistry{
+		conn: socket,
 		quit: make(<-chan bool),
 	}
 
-	// TODO set up server
-
-	go server(r.quit)
+	go server(socket, r.quit)
 
 	return r, nil
 }
@@ -26,7 +33,7 @@ func (r UnixRegistry) Terminate() {
 	quit <- true
 }
 
-func server(quit <-chan bool) {
+func server(conn net.Conn, quit <-chan bool) {
 	for {
 		select {
 		case <-quit:
